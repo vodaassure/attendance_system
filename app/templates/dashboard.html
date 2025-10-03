@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Welcome, {{ current_user.username }}</h4>
+            </div>
+            <div class="card-body">
+                <h5>Your Attendance Statistics (Current Month)</h5>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card text-center mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Working Days</h5>
+                                <p class="card-text display-4">{{ working_days }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Present Days</h5>
+                                <p class="card-text display-4">{{ present_days }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Attendance %</h5>
+                                <p class="card-text display-4">{{ attendance_percentage }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert {{ 'alert-success' if meets_requirement else 'alert-danger' }} mt-3">
+                    {% if meets_requirement %}
+                        <i class="fas fa-check-circle me-2"></i> Your attendance meets the minimum requirement of 60%.
+                    {% else %}
+                        <i class="fas fa-exclamation-triangle me-2"></i> Your attendance is below the minimum requirement of 60%.
+                    {% endif %}
+                </div>
+                
+                <div class="mt-4">
+                    <h5>Generate Custom Report</h5>
+                    <form method="POST" action="{{ url_for('attendance.generate_report') }}" class="row g-3">
+                        {{ date_range_form.hidden_tag() }}
+                        <div class="col-md-5">
+                            {{ date_range_form.start_date.label(class="form-label") }}
+                            {{ date_range_form.start_date(class="form-control", type="date") }}
+                        </div>
+                        <div class="col-md-5">
+                            {{ date_range_form.end_date.label(class="form-label") }}
+                            {{ date_range_form.end_date(class="form-control", type="date") }}
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            {{ date_range_form.submit(class="btn btn-primary w-100") }}
+                        </div>
+                    </form>
+                          </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Today's Attendance</h4>
+            </div>
+            <div class="card-body">
+                {% if today_attendance %}
+                    <div class="alert alert-info">
+                        <p><strong>Status:</strong> {{ today_attendance.status|title }}</p>
+                        <p><strong>Check-in:</strong> {{ today_attendance.check_in.strftime('%H:%M:%S') }}</p>
+                        {% if today_attendance.check_out %}
+                            <p><strong>Check-out:</strong> {{ today_attendance.check_out.strftime('%H:%M:%S') }}</p>
+                        {% else %}
+                            <p><strong>Check-out:</strong> Not checked out yet</p>
+                        {% endif %}
+                        {% if today_attendance.notes %}
+                            <p><strong>Notes:</strong> {{ today_attendance.notes }}</p>
+                        {% endif %}
+                    </div>
+                    <form method="POST" action="{{ url_for('attendance.mark_attendance') }}">
+                        {{ attendance_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ attendance_form.status.label(class="form-label") }}
+                            {{ attendance_form.status(class="form-select") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ attendance_form.notes.label(class="form-label") }}
+                            {{ attendance_form.notes(class="form-control") }}
+                        </div>
+                        <div class="d-grid">
+                            {{ attendance_form.submit(class="btn btn-warning", value="Update Attendance") }}
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="alert alert-warning">
+                        You haven't marked your attendance for today.
+                    </div>
+                    <form method="POST" action="{{ url_for('attendance.mark_attendance') }}">
+                        {{ attendance_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ attendance_form.status.label(class="form-label") }}
+                            {{ attendance_form.status(class="form-select") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ attendance_form.notes.label(class="form-label") }}
+                            {{ attendance_form.notes(class="form-control", placeholder="Optional notes...") }}
+                        </div>
+                        <div class="d-grid">
+                            {{ attendance_form.submit(class="btn btn-success") }}
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

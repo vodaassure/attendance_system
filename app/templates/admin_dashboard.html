@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Admin Dashboard</h4>
+                <span class="badge bg-light text-dark">Total Employees: {{ employee_stats|length }}</span>
+            </div>
+            <div class="card-body">
+                <h5>Generate Custom Report</h5>
+                <form method="POST" action="{{ url_for('attendance.generate_report') }}" class="row g-3 mb-4">
+                    {{ date_range_form.hidden_tag() }}
+                    <div class="col-md-5">
+                        {{ date_range_form.start_date.label(class="form-label") }}
+                        {{ date_range_form.start_date(class="form-control", type="date") }}
+                    </div>
+                    <div class="col-md-5">
+                        {{ date_range_form.end_date.label(class="form-label") }}
+                        {{ date_range_form.end_date(class="form-control", type="date") }}
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        {{ date_range_form.submit(class="btn btn-primary w-100") }}
+                    </div>
+                </form>
+                
+                <h5>Employee Attendance Overview (Current Month)</h5>
+                <div class="alert alert-info">
+                    <strong>Working Days This Month:</strong> {{ working_days }}
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Employee</th>
+                                <th>Email</th>
+                                <th>Present Days</th>
+                                <th>Attendance %</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in employee_stats %}
+                                <tr>
+                                    <td>{{ stat.employee.username }}</td>
+                                    <td>{{ stat.employee.email }}</td>
+                                    <td>{{ stat.present_days }}</td>
+                                    <td>{{ stat.attendance_percentage }}%</td>
+                                    <td>
+                                        {% if stat.meets_requirement %}
+                                            <span class="badge bg-success">Meets Requirement</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Below Requirement</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
