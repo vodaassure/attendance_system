@@ -1,5 +1,2 @@
-def add(a, b):
-    return a + b
-
-def subtract(a, b):
-    return a - b
+def test_basic_math():
+    assert 2 + 2 == 4
