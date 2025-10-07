@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8090:8090"
+    environment:
+      - SECRET_KEY=your_secret_key
+      - DATABASE_URL=postgresql://user:password@db:5432/attendance
+    depends_on:
+      - db
+    networks:
+      - net
+
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins
+    ports:
+      - "8080:8080"
+    volumes:
+      - $PWD/jenkins_home:/var/jenkins_home
+    networks:
+      - net
+
+  db:
+    image: postgres:13
+    volumes:
+      - /home/cloud_user/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=attendance
+    networks:
+      - net
+
+networks:
+  net:
