@@ -20,6 +20,15 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt \
 && pip install --no-cache-dir gunicorn
 
+
+RUN apt-get update && \
+    apt-get install -y python3-pip && \
+    apt-get clean
+
+
+RUN pip install --upgrade pip
+
+
 # Copy project files
 COPY config.py .
 COPY run.py .
