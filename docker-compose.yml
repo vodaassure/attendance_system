@@ -2,7 +2,7 @@ services:
   web:
     build: .
     ports:
-      - "8091:8091"
+      - "8090:8090"
     environment:
       - SECRET_KEY=your_secret_key
       - DATABASE_URL=postgresql://user:password@db:5432/attendance
