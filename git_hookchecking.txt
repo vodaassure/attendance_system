@@ -1,0 +1,1 @@
+this is my file checked for git_hooked_checking
