@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.9'
-        }
-    }
+    agent any  // Runs directly on the Jenkins host
 
     options {
         skipDefaultCheckout(true) // Prevent Jenkins from auto-checking out code
@@ -19,32 +15,29 @@ pipeline {
         PYTHONPATH = "/tmp/pip-packages/lib/python3.9/site-packages"
     }
 
-
     stages {
         stage('Checkout') {
             steps {
-               // deleteDir() // Clean workspace before cloning
-                // If repo is public, this works. If private, use withCredentials block.
                 sh 'git clone https://github.com/vodaassure/attendance_system.git .'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'ls -la' // Debug: list files to confirm requirements.txt is present
-             // sh 'pip install --no-cache-dir -r requirements.txt'
+                sh 'ls -la' // Confirm requirements.txt is present
                 sh 'pip install --no-cache-dir --prefix=/tmp/pip-packages -r requirements.txt'
-		sh 'pip install --no-cache-dir --prefix=/tmp/pip-packages pytest'
-		
+                sh 'pip install --no-cache-dir --prefix=/tmp/pip-packages pytest'
+                
             }
         }
-
+        
         stage('Test') {
             steps {
+                
                 sh '''
-                    export HOME=/tmp
-                    pip install --user pytest
-                    python -m pytest tests/
+                    export PYTHONPATH=/tmp/pip-packages
+                    pip install --target=/tmp/pip-packages pytest
+                    python3.10 -m pytest tests/
                 '''
             }
         }
