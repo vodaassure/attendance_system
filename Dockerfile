@@ -38,7 +38,7 @@ COPY app/ ./app/
 RUN mkdir -p instance
 
 # Expose port
-EXPOSE 8090
+EXPOSE 8091
 
 # Run gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8090", "run:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8091", "run:app"]
