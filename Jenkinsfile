@@ -1,8 +1,12 @@
+properties([
+  pipelineTriggers([githubPush()])
+])
+
 pipeline {
-    agent any  // Runs directly on the Jenkins host
+    agent any
 
     options {
-        skipDefaultCheckout(true) // Prevent Jenkins from auto-checking out code
+        skipDefaultCheckout(true)
     }
 
     parameters {
@@ -24,16 +28,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'ls -la' // Confirm requirements.txt is present
+                sh 'ls -la'
                 sh 'pip install --no-cache-dir --prefix=/tmp/pip-packages -r requirements.txt'
                 sh 'pip install --no-cache-dir --prefix=/tmp/pip-packages pytest'
-                
             }
         }
-        
+
         stage('Test') {
             steps {
-                
                 sh '''
                     export PYTHONPATH=/tmp/pip-packages
                     pip install --target=/tmp/pip-packages pytest
