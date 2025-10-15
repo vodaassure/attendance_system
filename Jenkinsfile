@@ -63,16 +63,21 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh '''
-                        # Use Minikube's Docker daemon
-                        eval $(minikube docker-env)
+                    // Get Minikube Docker environment variables
+                    def dockerEnv = sh(script: 'minikube docker-env --shell bash', returnStdout: true).trim()
 
-                        # Rebuild image inside Minikube's Docker
-                        docker compose build
+                    // Parse and inject environment variables into Jenkins
+                    def envVars = dockerEnv.readLines()
+                        .findAll { it.startsWith('export') }
+                        .collect { it.replace('export ', '').split('=') }
+                        .collect { "${it[0]}=${it[1].replaceAll('"', '')}" }
 
-                        # Apply Kubernetes manifests
-                        kubectl apply -f k8s-deployment.yaml
-                    '''
+                    withEnv(envVars) {
+                        sh '''
+                            docker compose build
+                            kubectl apply -f k8s-deployment.yaml
+                        '''
+                    }
                 }
             }
         }
