@@ -59,6 +59,23 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh '''
+                        # Use Minikube's Docker daemon
+                        eval $(minikube docker-env)
+
+                        # Rebuild image inside Minikube's Docker
+                        docker compose build
+
+                        # Apply Kubernetes manifests
+                        kubectl apply -f k8s-deployment.yaml
+                    '''
+                }
+            }
+        }
     }
 
     post {
