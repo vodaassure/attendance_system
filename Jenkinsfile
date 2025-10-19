@@ -1,12 +1,8 @@
-properties([
-  pipelineTriggers([githubPush()])
-])
-
 pipeline {
-    agent any
+    agent any  // Runs directly on the Jenkins host
 
     options {
-        skipDefaultCheckout(true)
+        skipDefaultCheckout(true) // Prevent Jenkins from auto-checking out code
     }
 
     parameters {
@@ -28,14 +24,16 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'ls -la'
+                sh 'ls -la' // Confirm requirements.txt is present
                 sh 'pip install --no-cache-dir --prefix=/tmp/pip-packages -r requirements.txt'
                 sh 'pip install --no-cache-dir --prefix=/tmp/pip-packages pytest'
+                
             }
         }
-
+        
         stage('Test') {
             steps {
+                
                 sh '''
                     export PYTHONPATH=/tmp/pip-packages
                     pip install --target=/tmp/pip-packages pytest
@@ -55,28 +53,6 @@ pipeline {
                         sh 'docker compose -f docker-compose.staging.yml up -d'
                     } else {
                         echo "No deployment configured for branch: ${params.BRANCH_NAME}"
-                    }
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    // Get Minikube Docker environment variables
-                    def dockerEnv = sh(script: 'minikube docker-env --shell bash', returnStdout: true).trim()
-
-                    // Parse and inject environment variables into Jenkins
-                    def envVars = dockerEnv.readLines()
-                        .findAll { it.startsWith('export') }
-                        .collect { it.replace('export ', '').split('=') }
-                        .collect { "${it[0]}=${it[1].replaceAll('"', '')}" }
-
-                    withEnv(envVars) {
-                        sh '''
-                            docker compose build
-                            kubectl apply -f k8s-deployment.yaml
-                        '''
                     }
                 }
             }
